@@ -1,11 +1,12 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
-*/
 package main
 
-import "github.com/kaizakin/kinctx/cmd"
+import(
+	"github.com/kaizakin/kinctx/cmd"
+	"github.com/kaizakin/kinctx/data"
+) 
 
 func main() {
+	data.OpenDatabase() 
+	data.CreateTable()
 	cmd.Execute()
 }

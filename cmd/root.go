@@ -15,13 +15,14 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "kinctx",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "A minimalist second brain for your terminal snippets",
+	Long: `kinctx is a high-performance CLI snippet manager designed for 
+developers who live in the terminal. 
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+It allows you to:
+- Save complex commands with tags and descriptions.
+- Use dynamic placeholders ({{VAR}}) for interactive command building.
+- Search and recall snippets instantly via fuzzy matching.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -37,6 +38,8 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Version = "0.1.0"
+
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
@@ -46,6 +49,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }
 
 
