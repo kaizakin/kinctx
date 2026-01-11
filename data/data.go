@@ -21,23 +21,36 @@ func OpenDatabase() error {
 }
 
 func CreateTable(){
-	createTableSQL := `
-	CREATE TABLE IF NOT EXISTS snippets(
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	command TEXT,
-	description TEXT,
-	tags TEXT,
-	usage_count INTEGER DEFAULT 0,
-	last_used DATETIME DEFAULT CURRENT_TIMESTAMP
+
+	snippetTableSQL := `
+	CREATE TABLE IF NOT EXISTS snippets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,          
+    command TEXT NOT NULL,       
+    usage_count INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
-	statement, err := db.Prepare(createTableSQL) // altho it doesn't make any sense to prepare the query for a cli app
-	// just for the good practice. prepare actually caches the query to perform efficienct reuse of query and some security from prompt injections.
+	aliasTableSQL := `
+	CREATE TABLE IF NOT EXISTS aliases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    alias_name TEXT UNIQUE NOT NULL, 
+    command TEXT NOT NULL    
+	);`
 
+	createSnippetTableStatement, err := db.Prepare(snippetTableSQL)
+    if err != nil {
+        log.Fatal(err.Error())
+    }
+
+	createAliasTableStatement, err := db.Prepare(aliasTableSQL)
 	if err != nil{
 		log.Fatal(err.Error())
 	}
 
-	statement.Exec()
-	log.Println("snippets table created")
+	createSnippetTableStatement.Exec()
+	log.Println("Snippets table created")
+
+	createAliasTableStatement.Exec()
+	log.Println("Alias Table Created")
 }

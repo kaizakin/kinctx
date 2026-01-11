@@ -7,6 +7,5 @@ import(
 
 func main() {
 	data.OpenDatabase() 
-	data.CreateTable()
 	cmd.Execute()
 }
