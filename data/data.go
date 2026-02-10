@@ -2,9 +2,12 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
-	_ "modernc.org/sqlite" // just import this for registering the driver not actually using it so _ in front.
+	"modernc.org/sqlite"
+	// _ "modernc.org/sqlite" // just import this for registering the driver not actually using it so _ in front.
+	sqlitelib "modernc.org/sqlite/lib"
 )
 
 var db *sql.DB
@@ -25,32 +28,24 @@ func CreateTable(){
 	snippetTableSQL := `
 	CREATE TABLE IF NOT EXISTS snippets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT NOT NULL,          
-    command TEXT NOT NULL,       
+    command TEXT UNIQUE NOT NULL,       
     usage_count INTEGER DEFAULT 0,
+	last_used_at INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
-	aliasTableSQL := `
-	CREATE TABLE IF NOT EXISTS aliases (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    alias_name TEXT UNIQUE NOT NULL, 
-    command TEXT NOT NULL    
-	);`
-
 	createSnippetTableStatement, err := db.Prepare(snippetTableSQL)
+	
     if err != nil {
-        log.Fatal(err.Error())
+        if sqliteErr, ok := err.(*sqlite.Error); ok {
+			if(sqliteErr.Code() == sqlitelib.SQLITE_CONSTRAINT_UNIQUE){
+				fmt.Println("You already have this command saved Einstein, try searching for it!")
+			}
+		}else{
+			log.Fatal(err)
+		}
     }
-
-	createAliasTableStatement, err := db.Prepare(aliasTableSQL)
-	if err != nil{
-		log.Fatal(err.Error())
-	}
 
 	createSnippetTableStatement.Exec()
 	log.Println("Snippets table created")
-
-	createAliasTableStatement.Exec()
-	log.Println("Alias Table Created")
 }
