@@ -2,25 +2,29 @@ package data
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
+	"fmt"
 
 	"modernc.org/sqlite"
-	// _ "modernc.org/sqlite" // just import this for registering the driver not actually using it so _ in front.
+	_ "modernc.org/sqlite" // just import this for registering the driver not actually using it so _ in front.
 	sqlitelib "modernc.org/sqlite/lib"
 )
 
 var db *sql.DB
 
-func OpenDatabase() error {
+func OpenDatabase() (*sql.DB, error) {
 	var err error
 
 	db, err = sql.Open("sqlite", "./sqlite-database.db")
 	if err != nil{
-		return err
+		return nil, err
 	}
 
-	return db.Ping()
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
 
 func CreateTable(){
@@ -30,22 +34,38 @@ func CreateTable(){
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     command TEXT UNIQUE NOT NULL,       
     usage_count INTEGER DEFAULT 0,
-	last_used_at INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
-	createSnippetTableStatement, err := db.Prepare(snippetTableSQL)
+	_, err := db.Exec(snippetTableSQL)
 	
-    if err != nil {
+	if err != nil {
+		log.Fatal(err)
+	}
+
+
+	log.Println("Snippets table created")
+}
+
+func AddSnippet(command string) error {
+	query := `INSERT INTO snippets (command) VALUES (?)`
+
+	insertCommandStmt, err := db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	defer insertCommandStmt.Close()
+
+	_, err = insertCommandStmt.Exec(command)
+	if err != nil {
         if sqliteErr, ok := err.(*sqlite.Error); ok {
 			if(sqliteErr.Code() == sqlitelib.SQLITE_CONSTRAINT_UNIQUE){
-				fmt.Println("You already have this command saved Einstein, try searching for it!")
+				return fmt.Errorf("You already have this command saved Einstein, try searching for it!")
 			}
 		}else{
-			log.Fatal(err)
+			return err
 		}
     }
-
-	createSnippetTableStatement.Exec()
-	log.Println("Snippets table created")
+	
+	return nil
 }
