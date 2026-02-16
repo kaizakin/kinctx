@@ -5,12 +5,14 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/kaizakin/kinctx/data"
+	"github.com/spf13/cobra"
 )
 
 func getEditor() string{
@@ -67,20 +69,42 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		command, err := captureInputFromEditor()
+		var inputCommand string
+		var err error
+
+		stat, err := os.Stdin.Stat()
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("error reading stdin stats: %w", err)
+			return
 		}
 
-		fmt.Printf("parsed command %v", command)
+		// if modechardevice bit is not set means data is being piped in
+		if (stat.Mode() & os.ModeCharDevice) == 0 {
+			// read everything from the pipe
+			bytes, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				fmt.Println("error reading from pipe: %w", err)
+				return
+			}
 
-		err = data.AddSnippet(command)
+			inputCommand = strings.TrimSpace(string(bytes))
+
+			fmt.Printf("command read from stdin %s \n", inputCommand)
+		}else{
+			inputCommand, err = captureInputFromEditor()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fmt.Printf("parsed command %v", inputCommand)
+		}
+
+		err = data.AddSnippet(inputCommand)
 		if err != nil {
 			fmt.Println(err)
 		}else{
 			fmt.Println("command saved successfully")	
 		}
-
 	},
 }
 
