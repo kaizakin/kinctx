@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var snippetSlice []data.Snippets
+var SnippetSlice []data.Snippets
 var err error
 
 var cardStyle = lipgloss.NewStyle().
@@ -42,12 +42,12 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		snippetSlice, err = data.ListSnippets()
+		SnippetSlice, err = data.ListSnippets()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		for _, s := range snippetSlice {
+		for _, s := range SnippetSlice {
 			renderSnippet(s)
 		}
 	},

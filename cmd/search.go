@@ -4,7 +4,9 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -13,8 +15,10 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/google/shlex"
+	"github.com/kaizakin/kinctx/data"
 	"github.com/spf13/cobra"
 )
+
 
 func main(rawCmd string){
 	fmt.Println(lipgloss.NewStyle().
@@ -104,6 +108,40 @@ func execute(cmdStr string) {
 	}
 }
 
+var list []string
+
+func fzf() error {
+	for _, s := range SnippetSlice {
+		list = append(list, s.Command)
+	}
+
+	cmd := exec.Command("fzf", "--height=40%", "--layout=reverse", "--border")
+
+	cmd.Stdin = strings.NewReader(strings.Join(list, "\n"))
+	cmd.Stderr = os.Stderr
+
+	var out bytes.Buffer // we save the output of the fzf to a buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		if exiterror, ok := err.(*exec.ExitError); ok && exiterror.ExitCode() == 130 {
+			return fmt.Errorf("Selection cancelled.")
+		}
+
+		return fmt.Errorf("Error running fzf: %v\n", err)
+	}
+
+	selected := strings.TrimSpace(out.String())
+
+	if selected == "" {
+		return fmt.Errorf("No option selected.")
+	}
+
+	fmt.Printf("picked command %s", selected)
+	main(selected)
+	return nil
+}
+
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
@@ -115,8 +153,17 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		main("docker run -p ${HOST_PORT:=5432}:5432 -e PASS=${DB_PASS:=secret} postgres:${PG_VERSION:=16}")
-		fmt.Println("ended successfully!")
+		SnippetSlice, err = data.ListSnippets() // again updating the var becoz what if the user didn't run list for a long time
+		// so when user  types search snippetslice var gets updated with latest commands
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = fzf()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("search and execute successfull")
 	},
 }
 
