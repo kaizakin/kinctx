@@ -4,11 +4,13 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/kaizakin/kinctx/data"
@@ -20,8 +22,6 @@ func getEditor() string{
 	if editor == ""{
 		editor = "nano"
 	}
-	
-	fmt.Printf("found %v\n", editor)
 
 	return editor
 }
@@ -59,6 +59,26 @@ func captureInputFromEditor() (string, error) {
 	return parsedCommand, nil
 }
 
+var placeholderRe = regexp.MustCompile(`\$\{([a-zA-Z_][a-zA-Z0-9_]*)(?::=([^}]*))?\}`)
+var brokenSyntaxRe = regexp.MustCompile(`\$\{[^}]*$`)
+
+func ValidateCmd(cmd string) error {
+	if brokenSyntaxRe.MatchString(cmd) {
+		return errors.New("syntax error: detected unclosed '${' or malformed placeholder 🥲")
+	} /// early return if the regex pattern in cmd is broken
+
+	if strings.Contains(cmd, "${}") || strings.Contains(cmd, "${:=}") {
+		return errors.New("syntax error: placeholder key cannot be empty 🥲")
+	}
+
+	matches := placeholderRe.FindAllStringSubmatch(cmd, -1)
+	if len(matches) == 0 {
+		return nil
+	}// regular command no placeholder syntax
+
+	return nil
+}
+
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "A brief description of your command",
@@ -89,21 +109,26 @@ to quickly create a Cobra application.`,
 
 			inputCommand = strings.TrimSpace(string(bytes))
 
-			fmt.Printf("command read from stdin %s \n", inputCommand)
 		}else{
 			inputCommand, err = captureInputFromEditor()
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			fmt.Printf("parsed command %v", inputCommand)
+		}
+
+		err = ValidateCmd(inputCommand)
+		if err != nil {
+			fmt.Println("")
+			fmt.Println(err)
+			return
 		}
 
 		err = data.AddSnippet(inputCommand)
 		if err != nil {
 			fmt.Println(err)
 		}else{
-			fmt.Println("command saved successfully")	
+			fmt.Println("command saved successfully!")	
 		}
 	},
 }
