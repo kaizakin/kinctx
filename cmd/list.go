@@ -47,6 +47,10 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
+		if len(SnippetSlice) == 0 {
+			fmt.Println("Kin Store is empty Fam!")
+		}
+
 		for _, s := range SnippetSlice {
 			renderSnippet(s)
 		}
