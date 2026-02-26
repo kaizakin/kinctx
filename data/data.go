@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"modernc.org/sqlite"
@@ -111,4 +112,37 @@ func ListSnippets() ([]Snippets, error) {
 	}
 
 	return snippetSlice, err
+}
+
+func DeleteSnippets(idsToDelete []int) error {
+	if len(idsToDelete) == 0 {
+		return fmt.Errorf("No id's to Delete!")
+	}
+
+	// innorder to prevent sql injection and as a safe good practice construct a placeholder string and pass
+	// args as an arguement
+	placeHolders := make([]string, len(idsToDelete))
+	args := make([]any, len(idsToDelete))
+
+	for i, id := range idsToDelete{
+		placeHolders[i] = "?"
+		args[i] = id
+	}
+
+	placeholderStr := strings.Join(placeHolders, ",")
+	query := fmt.Sprintf("DELETE FROM snippets WHERE id IN (%s)", placeholderStr)
+
+	result, err := db.Exec(query, args...)
+	if err != nil {
+		return fmt.Errorf("Failed to delete commands: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Deleted but could not verify dropped rows: %w", err)
+	}
+
+	fmt.Printf("%d rows affected\n", rowsAffected)
+
+	return nil
 }
