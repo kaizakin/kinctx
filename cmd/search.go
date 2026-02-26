@@ -115,9 +115,9 @@ func fzf() error {
 		list = append(list, s.Command)
 	}
 
-	cmd := exec.Command("fzf", "--height=40%", "--layout=reverse", "--border")
+	cmd := exec.Command("fzf", "--height=40%", "--layout=reverse", "--border" , "--read0", "--highlight-line")
 
-	cmd.Stdin = strings.NewReader(strings.Join(list, "\n"))
+	cmd.Stdin = strings.NewReader(strings.Join(list, "\x00"))
 	cmd.Stderr = os.Stderr
 
 	var out bytes.Buffer // we save the output of the fzf to a buffer
