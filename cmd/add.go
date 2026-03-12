@@ -63,6 +63,12 @@ var placeholderRe = regexp.MustCompile(`\$\{([a-zA-Z_][a-zA-Z0-9_]*)(?::=([^}]*)
 var brokenSyntaxRe = regexp.MustCompile(`\$\{[^}]*$`)
 
 func ValidateCmd(cmd string) error {
+	// handle empty or whitespace-only commands
+	if strings.TrimSpace(cmd) == "" {
+		fmt.Println("no command was found gang!")
+		os.Exit(0)
+	}
+
 	if brokenSyntaxRe.MatchString(cmd) {
 		return errors.New("syntax error: detected unclosed '${' or malformed placeholder 🥲")
 	} /// early return if the regex pattern in cmd is broken
