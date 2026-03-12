@@ -16,6 +16,13 @@ var initCmd = &cobra.Command{
 - this is the table that stores all the aliases that you've created with kinctx.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		data.CreateTable()
+		fmt.Println(`
+ _  ___            _        
+| |/ (_)_ __   ___| |___  __
+| ' /| | '_ \ / __| __\ \/ /
+| . \| | | | | (__| |_ >  < 
+|_|\_\_|_| |_|\___|\__/_/\_\
+`)
 		fmt.Println("Kinctx Datatables created successfully ❇️")
 	},
 }

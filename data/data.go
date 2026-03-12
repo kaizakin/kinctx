@@ -52,9 +52,6 @@ func CreateTable(){
 	if err != nil {
 		log.Fatal(err)
 	}
-
-
-	log.Println("Snippets table created")
 }
 
 func AddSnippet(command string) error {
