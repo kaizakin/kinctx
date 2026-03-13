@@ -6,31 +6,54 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"github.com/kaizakin/kinctx/data"
 	"github.com/spf13/cobra"
-	"github.com/charmbracelet/lipgloss"
 )
 
 var SnippetSlice []data.Snippets
 var err error
 
-var cardStyle = lipgloss.NewStyle().
-	Border(lipgloss.NormalBorder(), false, false, false, true). // Left border only
-	BorderForeground(lipgloss.Color("#5B4FB5")).                // Purple border
-	PaddingLeft(2).
-	MarginBottom(1)
+var gappedBorder = lipgloss.Border{
+	Top:        "",
+	Bottom:     "─",
+	Left:       "|",
+	Right:      "|",
+	TopLeft:    "",
+	TopRight:   "",
+	BottomLeft: "",
+	BottomRight:"",
+}
 
-var commandStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#FF79C6")). // Pink/Magenta 
-	Bold(true)
 
-var metaStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#6272A4")) // Muted Blue/Grey
+var (
+	headerStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#5B4FB5")).
+			Bold(true).
+			Align(lipgloss.Center).
+			Padding(0, 1)
 
-var statsStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#50FA7B")) // Bright Green
+	commandStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color(lipgloss.Color("205"))).
+			Bold(true)
+
+	dimStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("110"))
+
+	successStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("42"))
+
+	borderStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#44475a")) // Muted separator color
+
+	placeholderStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFB86C")). // Custom color for placeholders
+			Italic(true)
+)
 
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -49,28 +72,75 @@ to quickly create a Cobra application.`,
 
 		if len(SnippetSlice) == 0 {
 			fmt.Println("Kin Store is empty Fam!")
+			return
 		}
 
-		for _, s := range SnippetSlice {
-			renderSnippet(s)
-		}
+		renderTable(SnippetSlice)
 	},
-}
-func renderSnippet(s data.Snippets) {
-	cmdBlock := commandStyle.Render(fmt.Sprintf("$ %s", s.Command))
-
-	idStr := fmt.Sprintf("#%d", s.Id)
-	dateStr := s.CreatedAtFormatted
-	
-	usageStr := statsStyle.Render(fmt.Sprintf("Used %d times", s.UsageCount))
-	
-	metaBlock := metaStyle.Render(strings.Join([]string{idStr, dateStr, usageStr}, " • "))
-
-	ui := cardStyle.Render(fmt.Sprintf("%s\n%s", cmdBlock, metaBlock))
-
-	fmt.Println(ui)
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+}
+
+func formatStyledCommand(cmd string) string {
+	re := regexp.MustCompile(`\$\{([a-zA-Z_][a-zA-Z0-9_]*)(?::=([^}]*))?\}`)
+
+	lines := strings.Split(cmd, "\n")
+	for i, line := range lines {
+		matches := re.FindAllStringIndex(line, -1)
+
+		if len(matches) == 0 {
+			lines[i] = commandStyle.Render(line)
+			continue
+		}
+
+		var result string
+		var lastEnd int
+
+		for _, match := range matches {
+			start, end := match[0], match[1]
+
+			if start > lastEnd {
+				result += commandStyle.Render(line[lastEnd:start])
+			}
+
+			result += placeholderStyle.Render(line[start:end])
+			lastEnd = end
+		}
+
+		if lastEnd < len(line) {
+			result += commandStyle.Render(line[lastEnd:])
+		}
+		
+		lines[i] = result
+	}
+
+	return lipgloss.NewStyle().Align(lipgloss.Left).Render(strings.Join(lines, "\n"))
+}
+
+func renderTable(snippets []data.Snippets) {
+	rows := [][]string{}
+
+	for _, s := range snippets {
+		rows = append(rows, []string{
+			formatStyledCommand(s.Command),
+			successStyle.Render(fmt.Sprintf("%d uses", s.UsageCount)),
+			dimStyle.Render(s.CreatedAtFormatted),
+		})
+	}
+
+	t := table.New().
+		Border(gappedBorder).
+		BorderStyle(borderStyle).
+		Headers("COMMAND", "USAGE", "DATE").
+		Rows(rows...).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 0 {
+				return headerStyle
+			}
+			return lipgloss.NewStyle().Padding(0, 1).Align(lipgloss.Left)
+		})
+
+	fmt.Println(t.Render())
 }
