@@ -22,7 +22,6 @@ import (
 
 func main(rawCmd string){
 	fmt.Println(lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#bd93f9")).
 	Bold(true).
 	Render("\n  ⚡ KIN EXECUTION ENGINE ⚡\n"))
 
@@ -82,8 +81,6 @@ func main(rawCmd string){
 }
 
 func execute(cmdStr string) {
-	fmt.Printf("Executing %s", cmdStr)
-
 	parts, err := shlex.Split(cmdStr) 
 	if err != nil {
 		fmt.Println("Failed to parse the command!")
@@ -91,7 +88,7 @@ func execute(cmdStr string) {
 	}
 
 	if len(parts) == 0 {
-		fmt.Println("Empty command cannot be executed!")
+		fmt.Println("\nEmpty command cannot be executed!")
 		os.Exit(1)
 	}
 
@@ -103,7 +100,7 @@ func execute(cmdStr string) {
 	cmd.Stdout = os.Stdout
 
 	if err := cmd.Run(); err != nil {
-		fmt.Println("Command failed to execute!")
+		fmt.Println("\nCommand failed to execute!")
 		os.Exit(1)
 	}
 }
@@ -115,7 +112,7 @@ func fzf() error {
 		list = append(list, s.Command)
 	}
 
-	cmd := exec.Command("fzf", "--height=40%", "--layout=reverse", "--border" , "--read0", "--highlight-line")
+	cmd := exec.Command("fzf", "--height=40%", "--layout=reverse", "--border" , "--read0", "--print0", "--highlight-line")
 
 	cmd.Stdin = strings.NewReader(strings.Join(list, "\x00"))
 	cmd.Stderr = os.Stderr
@@ -131,13 +128,18 @@ func fzf() error {
 		return fmt.Errorf("Error running fzf: %v\n", err)
 	}
 
-	selected := strings.TrimSpace(out.String())
+	selected := strings.TrimSuffix(out.String(), "\x00")
 
 	if selected == "" {
 		return fmt.Errorf("No option selected.")
 	}
 
-	fmt.Printf("picked command %s", selected)
+
+	err := data.UpdateSnippetUsage(selected)
+	if err != nil {
+		fmt.Printf("\nError updating usage count: %v\n", err)
+	}
+
 	main(selected)
 	return nil
 }
@@ -163,7 +165,7 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		fmt.Println("search and execute successfull")
+		fmt.Println("\n search and execute successfull")
 	},
 }
 

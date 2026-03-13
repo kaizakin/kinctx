@@ -79,7 +79,7 @@ func AddSnippet(command string) error {
 
 func ListSnippets() ([]Snippets, error) {
 	query := `SELECT id, command, usage_count, created_at from snippets
-	ORDER BY id ASC`
+	ORDER BY usage_count DESC`
 
 	listCommandstmt, err := db.Prepare(query)
 	if err != nil {
@@ -141,5 +141,22 @@ func DeleteSnippets(idsToDelete []int) error {
 
 	fmt.Printf("%d rows affected\n", rowsAffected)
 
+	return nil
+}
+
+func UpdateSnippetUsage(command string) error {
+	query := `UPDATE snippets SET usage_count = usage_count + 1 WHERE command = ?`
+
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(command)
+	if err != nil {
+        return fmt.Errorf("failed to update usage count: %w", err)
+	}
+	
 	return nil
 }
