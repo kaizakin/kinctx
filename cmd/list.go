@@ -32,13 +32,11 @@ var gappedBorder = lipgloss.Border{
 
 var (
 	headerStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#5B4FB5")).
 			Bold(true).
 			Align(lipgloss.Center).
 			Padding(0, 1)
 
 	commandStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(lipgloss.Color("205"))).
 			Bold(true)
 
 	dimStyle = lipgloss.NewStyle().
@@ -48,10 +46,10 @@ var (
 			Foreground(lipgloss.Color("42"))
 
 	borderStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#44475a")) // Muted separator color
+			Foreground(lipgloss.Color("244")) // Muted separator color
 
 	placeholderStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFB86C")). // Custom color for placeholders
+			Foreground(lipgloss.Color("221")). // Custom color for placeholders
 			Italic(true)
 )
 
@@ -136,7 +134,7 @@ func renderTable(snippets []data.Snippets) {
 		Headers("COMMAND", "USAGE", "DATE").
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
+			if row == -1 {
 				return headerStyle
 			}
 			return lipgloss.NewStyle().Padding(0, 1).Align(lipgloss.Left)
