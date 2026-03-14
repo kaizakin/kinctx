@@ -1,8 +1,10 @@
 <div align="center">
-  <h1>KINCTX</h1>
+  <h1>Kinctx</h1>
 </div>
 
-<img src=".github/kinctx.png" alt="kinctx banner" width="100%" />
+<div align="center">
+  <img src=".github/kinctx.png" alt="kinctx banner" width="40%" height="40%" />
+</div>
 
 `kinctx` is a terminal-first command library for the snippets you keep rewriting, re-Googling, or forgetting.
 
