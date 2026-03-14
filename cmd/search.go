@@ -13,7 +13,6 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/google/shlex"
 	"github.com/kaizakin/kinctx/data"
 	"github.com/spf13/cobra"
 )
@@ -80,18 +79,17 @@ func main(rawCmd string){
 }
 
 func execute(cmdStr string) {
-	parts, err := shlex.Split(cmdStr) 
-	if err != nil {
-		fmt.Println("Failed to parse the command!")
-		os.Exit(1)
-	}
-
-	if len(parts) == 0 {
+	if strings.TrimSpace(cmdStr) == "" {
 		fmt.Println("\nEmpty command cannot be executed!")
 		os.Exit(1)
 	}
 
-	cmd := exec.Command(parts[0], parts[1:]...)
+	shell := os.Getenv("SHELL")
+	if shell == "" {
+		shell = "sh"
+	}
+
+	cmd := exec.Command(shell, "-c", cmdStr)
 
 	//wire up file descriptors
 	cmd.Stdin = os.Stdin

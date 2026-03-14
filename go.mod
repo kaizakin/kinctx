@@ -3,10 +3,8 @@ module github.com/kaizakin/kinctx
 go 1.25.5
 
 require (
-	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
 	github.com/charmbracelet/huh v0.8.0
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/spf13/cobra v1.10.2
 	modernc.org/sqlite v1.41.0
 )
