@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
@@ -60,11 +59,12 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		SnippetSlice, err = data.ListSnippets()
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("Failed to list snippets: %v\n", err)
+			return
 		}
 
 		if len(SnippetSlice) == 0 {
-			fmt.Println("Kin Store is empty Fam!")
+			fmt.Println("Your kinctx store is empty. Use 'kinctx add' to save some snippets!")
 			return
 		}
 

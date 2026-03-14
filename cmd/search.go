@@ -6,7 +6,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -61,7 +60,7 @@ func main(rawCmd string){
 
 	err := form.Run()
 	if err != nil {
-		fmt.Println("User cancelled!")
+		fmt.Println("Execution cancelled by user.")
 		os.Exit(1)
 	}
 
@@ -71,7 +70,7 @@ func main(rawCmd string){
 		userValue := *answerPtr
 
 		if userValue == "" {
-			fmt.Printf("Warning: %s was left empty.\n", fullMatch)
+			fmt.Printf("Warning: placeholder %s was left empty.\n", fullMatch)
 		}
 
 		finalCmd = strings.Replace(finalCmd, fullMatch, userValue, 1)
@@ -100,7 +99,7 @@ func execute(cmdStr string) {
 	cmd.Stdout = os.Stdout
 
 	if err := cmd.Run(); err != nil {
-		fmt.Println("\nCommand failed to execute!")
+		fmt.Printf("\nCommand failed to execute: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -137,7 +136,7 @@ func fzf() error {
 
 	err := data.UpdateSnippetUsage(selected)
 	if err != nil {
-		fmt.Printf("\nError updating usage count: %v\n", err)
+		fmt.Printf("\nWarning: could not update usage count: %v\n", err)
 	}
 
 	main(selected)
@@ -153,14 +152,14 @@ var searchCmd = &cobra.Command{
 		SnippetSlice, err = data.ListSnippets() // again updating the var becoz what if the user didn't run list for a long time
 		// so when user  types search snippetslice var gets updated with latest commands
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("Failed to load commands: %v\n", err)
+			return
 		}
 		err = fzf()
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("Search failed: %v\n", err)
+			return
 		}
-
-		fmt.Println("\n search and execute successfull")
 	},
 }
 

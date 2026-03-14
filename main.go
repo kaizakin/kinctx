@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	"github.com/kaizakin/kinctx/cmd"
 	"github.com/kaizakin/kinctx/data"
@@ -10,7 +11,8 @@ import (
 func main() {
 	db, err := data.OpenDatabase() 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Failed to open database: %v\n", err)
+		os.Exit(1)
 	}
 
 	defer db.Close() // making sure db connection is closed after exit

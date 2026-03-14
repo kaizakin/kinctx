@@ -6,7 +6,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -38,7 +37,7 @@ func rm() error {
 
 	if err := cmd.Run(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok && exitError.ExitCode() == 130 {
-			fmt.Println("CANCELLED...")
+			fmt.Println("Deletion cancelled by user.")
 			return nil
 		}
 
@@ -101,13 +100,16 @@ var rmCmd = &cobra.Command{
 		SnippetSlice, err = data.ListSnippets() // again updating the var becoz what if the user didn't run list for a long time
 		// so when user  types search snippetslice var gets updated with latest commands
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("Failed to load commands: %v\n", err)
+			return
 		}
 
 		var err error
 		err = rm();
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("Error: %v\n", err)
+		} else {
+			fmt.Println("Success!")
 		}
 	},
 }

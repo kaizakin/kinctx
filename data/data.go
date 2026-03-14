@@ -3,7 +3,6 @@ package data
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -37,7 +36,7 @@ func OpenDatabase() (*sql.DB, error) {
 	return db, nil
 }
 
-func CreateTable(){
+func CreateTable() error {
 
 	snippetTableSQL := `
 	CREATE TABLE IF NOT EXISTS snippets (
@@ -50,8 +49,9 @@ func CreateTable(){
 	_, err := db.Exec(snippetTableSQL)
 	
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to create table: %w", err)
 	}
+	return nil
 }
 
 func AddSnippet(command string) error {
@@ -83,7 +83,7 @@ func ListSnippets() ([]Snippets, error) {
 
 	listCommandstmt, err := db.Prepare(query)
 	if err != nil {
-		log.Fatal("List query preparation failed!")
+		return nil, fmt.Errorf("list query preparation failed: %w", err)
 	}
 	defer listCommandstmt.Close()
 
@@ -134,12 +134,10 @@ func DeleteSnippets(idsToDelete []int) error {
 		return fmt.Errorf("Failed to delete commands: %v", err)
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	_, err = result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("Deleted but could not verify dropped rows: %w", err)
 	}
-
-	fmt.Printf("%d rows affected\n", rowsAffected)
 
 	return nil
 }

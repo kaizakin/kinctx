@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -65,7 +64,7 @@ var brokenSyntaxRe = regexp.MustCompile(`\$\{[^}]*$`)
 func ValidateCmd(cmd string) error {
 	// handle empty or whitespace-only commands
 	if strings.TrimSpace(cmd) == "" {
-		fmt.Println("no command was found gang!")
+		fmt.Println("No command was provided. Please pipe a command or type one in the editor.")
 		os.Exit(0)
 	}
 
@@ -95,7 +94,7 @@ var addCmd = &cobra.Command{
 
 		stat, err := os.Stdin.Stat()
 		if err != nil {
-			fmt.Println("error reading stdin stats: %w", err)
+			fmt.Printf("Error reading stdin stats: %v\n", err)
 			return
 		}
 
@@ -104,7 +103,7 @@ var addCmd = &cobra.Command{
 			// read everything from the pipe
 			bytes, err := io.ReadAll(os.Stdin)
 			if err != nil {
-				fmt.Println("error reading from pipe: %w", err)
+				fmt.Printf("Error reading from pipe: %v\n", err)
 				return
 			}
 
@@ -113,23 +112,23 @@ var addCmd = &cobra.Command{
 		}else{
 			inputCommand, err = captureInputFromEditor()
 			if err != nil {
-				log.Fatal(err)
+				fmt.Printf("Error capturing input from editor: %v\n", err)
+				return
 			}
 
 		}
 
 		err = ValidateCmd(inputCommand)
 		if err != nil {
-			fmt.Println("")
-			fmt.Println(err)
+			fmt.Printf("\nCommand Validation failed: %v\n", err)
 			return
 		}
 
 		err = data.AddSnippet(inputCommand)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("Failed to save command: %v\n", err)
 		}else{
-			fmt.Println("command saved successfully!")	
+			fmt.Println("Command saved successfully!")	
 		}
 	},
 }
