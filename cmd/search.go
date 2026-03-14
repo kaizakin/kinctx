@@ -56,7 +56,7 @@ func main(rawCmd string){
 
 	form := huh.NewForm(
 		huh.NewGroup(fields...),
-	).WithTheme(huh.ThemeDracula())
+	).WithTheme(huh.ThemeBase16())
 
 	err := form.Run()
 	if err != nil {
