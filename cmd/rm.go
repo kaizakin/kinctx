@@ -95,13 +95,8 @@ func rm() error {
 // rmCmd represents the rm command
 var rmCmd = &cobra.Command{
 	Use:   "rm",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Remove one or more commands from the store",
+	Long: `Interactively delete commands from your kinctx database using an fzf-powered interface. You can select multiple commands to delete at once using the [TAB] key, and press [ENTER] to confirm deletion. Keep your snippet library clean and relevant!`,
 	Run: func(cmd *cobra.Command, args []string) {
 		SnippetSlice, err = data.ListSnippets() // again updating the var becoz what if the user didn't run list for a long time
 		// so when user  types search snippetslice var gets updated with latest commands

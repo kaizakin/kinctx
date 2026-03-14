@@ -14,7 +14,7 @@ developers who live in the terminal.
 
 It allows you to:
 - Save complex commands you keep on forgetting.
-- Save commands with dynamic placeholders ({{VAR}}) and dynamically fill values at execution time.
+- Save commands with dynamic placeholders (${VAR:=default}) and dynamically fill values at execution time.
 `,
 }
 

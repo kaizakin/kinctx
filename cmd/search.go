@@ -147,13 +147,8 @@ func fzf() error {
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Search, evaluate, and execute a saved command",
+	Long: `Use an interactive fzf search to quickly find a saved snippet. Once selected, kinctx will parse any placeholders (like ${VAR:=default}) and prompt you for values using an interactive form. After filling in the variables, the finalized command is directly executed in your terminal. This is the core workflow of kinctx!`,
 	Run: func(cmd *cobra.Command, args []string) {
 		SnippetSlice, err = data.ListSnippets() // again updating the var becoz what if the user didn't run list for a long time
 		// so when user  types search snippetslice var gets updated with latest commands

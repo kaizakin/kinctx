@@ -87,13 +87,8 @@ func ValidateCmd(cmd string) error {
 
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Save a new command to your kinctx store",
+	Long: `Securely store a shell command in your kinctx database. You can either pipe a command via stdin or open your default editor ($EDITOR) to compose complex, multi-line commands. You can also include dynamic placeholders like ${VAR:=default} to be evaluated at runtime.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var inputCommand string
 		var err error
