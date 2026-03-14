@@ -3,6 +3,8 @@ package data
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -24,8 +26,19 @@ type Snippets struct {
 func OpenDatabase() (*sql.DB, error) {
 	var err error
 
-	db, err = sql.Open("sqlite", "./sqlite-database.db")
-	if err != nil{
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user config directory: %w", err)
+	}
+
+	appConfigDir := filepath.Join(configDir, "kinctx")
+	if err := os.MkdirAll(appConfigDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	dbPath := filepath.Join(appConfigDir, "sqlite-database.db")
+	db, err = sql.Open("sqlite", dbPath)
+	if err != nil {
 		return nil, err
 	}
 
