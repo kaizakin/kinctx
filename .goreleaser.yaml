@@ -1,0 +1,28 @@
+builds:
+  - id: "kin-cli"
+    main: ./main.go 
+    binary: kin
+    env:
+      - CGO_ENABLED=0 # Forces pure Go, making static linking easier
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -extldflags "-static" # remove Strip Symbol Table, remove DWARF debug info, instruct linker to produce fully static binary
+
+# Generate Homebrew formula for Mac & Linux
+brews:
+  - name: kin
+    repository:
+      owner: kaizakin
+      name: homebrew-tap
+    directory: Formula
+    homepage: "https://github.com/kaizakin/kinctx"
+    description: "A terminal-first snippet manager"
+    license: "MIT"
