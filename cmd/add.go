@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/kaizakin/kinctx/data"
@@ -18,11 +19,15 @@ import (
 
 func getEditor() string{
 	editor := os.Getenv("EDITOR")
-	if editor == ""{
-		editor = "nano"
+	if editor != "" {
+		return editor
 	}
 
-	return editor
+	if runtime.GOOS == "windows" {
+		return "notepad"
+	}
+
+	return "nano" // fallback
 }
 
 func captureInputFromEditor() (string, error) {
