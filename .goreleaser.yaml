@@ -28,3 +28,14 @@ homebrew_casks:
     homepage: "https://github.com/kaizakin/kinctx"
     description: "A terminal-first snippet manager"
     license: "MIT"
+  
+scoops:
+  - name: kin
+    repository:
+      owner: kaizakin
+      name: kinctx-scoop
+      branch: main
+
+    homepage: "https://github.com/kaizakin/kinctx"
+    description: "A terminal-first snippet manager"
+    license: "MIT"

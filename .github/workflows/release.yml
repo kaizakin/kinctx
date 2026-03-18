@@ -29,3 +29,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GH_TOKEN }} 
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }} # Needed to push Homebrew formula
+          SCOOP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
